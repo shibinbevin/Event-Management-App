@@ -1,0 +1,99 @@
+body {
+    background-color: #f8f9fa;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1d1e22;
+    color: #fff;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1030;
+}
+
+.navbar .brand {
+    font-size: 20px; /* Increase the size of the navbar brand */
+}
+
+.sidebar {
+    background-color: #1d1e22;
+    color: #fff;
+    height: calc(100vh - 56px);
+    /* Adjust height to account for navbar */
+    position: absolute;
+    top: 66px;
+    /* Align with navbar height */
+    left: 0;
+    width: 250px;
+    transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
+}
+
+.sidebar-sticky {
+    overflow-y: auto;
+    height: 100%;
+}
+
+.sidebar .nav-link {
+    color: #fff;
+    font-weight: 500;
+    padding: 10px 20px;
+}
+
+.sidebar .nav-link:hover {
+    color: #f8f9fa;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.main-content {
+    margin-left: 250px;
+    padding: 20px;
+    transition: margin-left 0.3s ease-in-out;
+}
+
+.main-content h1 {
+    margin-bottom: 30px;
+    color: #343a40;
+}
+
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.table {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 0;
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .sidebar.active {
+        width: 250px;
+    }
+
+    .main-content.shifted {
+        margin-left: 250px;
+    }
+}
+
+.toggle-btn {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1000;
+    margin-right: 12px;
+}
