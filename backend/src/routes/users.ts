@@ -71,14 +71,6 @@ router.post('/register', (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-  // Joy Validation
-  const result = userSchema.validate(req.body);
-  if (result.error) {
-    return res.status(422).json({
-      success: false,
-      msg: `Validation err: ${result.error.details[0].message}`,
-    });
-  }
 
   const { email, password } = req.body;
 
@@ -89,7 +81,7 @@ router.post('/login', async (req, res) => {
 
     const user = await userRepository.findOne({ email });
     if (!user) {
-      return res.json({ success: false, msg: 'Wrong credentials' });
+      return res.json({ success: false, msg: 'Invalid credentials' });
     }
 
     if (!user.password) {
@@ -98,7 +90,7 @@ router.post('/login', async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.json({ success: false, msg: 'Wrong credentials' });
+      return res.json({ success: false, msg: 'Invalid credentials' });
     }
 
     if (!process.env.SECRET) {
@@ -141,7 +133,6 @@ router.post('/login', async (req, res) => {
     });
   }
 });
-
 
 router.post('/logout', checkToken, logoutUser);
 

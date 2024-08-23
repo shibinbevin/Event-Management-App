@@ -12,7 +12,7 @@ interface EventData {
   organizer_name: string;
   event_date: string;
   status: string;
-  image?: FileList;
+  image?: string; // Changed to string for image URL
   venue: VenueData;
   category: Category;
 }
@@ -31,7 +31,13 @@ interface Category {
 }
 
 function Home() {
-  const { control, register, handleSubmit, reset, formState: { errors } } = useForm<EventData>();
+  const {
+    control,
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<EventData>();
   const [events, setEvents] = useState<EventData[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [venues, setVenues] = useState<VenueData[]>([]);
@@ -41,6 +47,7 @@ function Home() {
   const [eventName, setEventName] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [success, setSuccess] = useState('');
+  const [eventsToShow, setEventsToShow] = useState<number>(8); // Number of events to show initially
 
   const { role } = useAppSelector(selectUser);
 
@@ -94,8 +101,9 @@ function Home() {
       venue: { venue_id: '', venue_name: '', city: '', country: '', capacity: 0 },
       category: { category_id: '', category_name: '' },
     });
-    setIsModalOpen(true)
+    setIsModalOpen(true);
   };
+
   const closeModal = () => setIsModalOpen(false);
 
   const onSubmit = async (data: EventData) => {
@@ -112,11 +120,11 @@ function Home() {
 
       const res = await axios.post('http://localhost:5000/api/events/add', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
-      setEvents((prevEvents) => [...prevEvents, res.data.newEvent]);
+      setEvents(prevEvents => [...prevEvents, res.data.newEvent]);
       setSuccess('Event Submitted for Approval');
       setIsModalOpen(false);
     } catch (error: any) {
@@ -125,8 +133,12 @@ function Home() {
     }
   };
 
+  const handleViewMore = () => {
+    setEventsToShow(prevCount => prevCount + 8); // Increase the number of events shown
+  };
+
   return (
-    <section id="service" className='py-5'>
+    <section id="service" className="py-5">
       <Container>
         {/* Success Alert */}
         {success && (
@@ -136,10 +148,11 @@ function Home() {
             </Alert>
           </Col>
         )}
-        {role === "user" &&
+        {role === 'user' && (
           <Button variant="primary" className="mb-4" onClick={openModal}>
             Create Event
-          </Button>}
+          </Button>
+        )}
         <Modal show={isModalOpen} onHide={closeModal}>
           <Modal.Header closeButton>
             <Modal.Title>{'Create Event'}</Modal.Title>
@@ -153,7 +166,9 @@ function Home() {
                 placeholder="Event Name"
                 className={`form-control mb-3 ${errors.event_name ? 'is-invalid' : ''}`}
               />
-              {errors.event_name && <div className="invalid-feedback">{errors.event_name.message}</div>}
+              {errors.event_name && (
+                <div className="invalid-feedback">{errors.event_name.message}</div>
+              )}
 
               <label htmlFor="organizer_name">Event Organizer</label>
               <input
@@ -162,7 +177,9 @@ function Home() {
                 placeholder="Event Organizer"
                 className={`form-control mb-3 ${errors.organizer_name ? 'is-invalid' : ''}`}
               />
-              {errors.organizer_name && <div className="invalid-feedback">{errors.organizer_name.message}</div>}
+              {errors.organizer_name && (
+                <div className="invalid-feedback">{errors.organizer_name.message}</div>
+              )}
 
               <label htmlFor="event_date">Event Date</label>
               <input
@@ -170,7 +187,9 @@ function Home() {
                 {...register('event_date', { required: 'Event Date is required' })}
                 className={`form-control mb-3 ${errors.event_date ? 'is-invalid' : ''}`}
               />
-              {errors.event_date && <div className="invalid-feedback">{errors.event_date.message}</div>}
+              {errors.event_date && (
+                <div className="invalid-feedback">{errors.event_date.message}</div>
+              )}
 
               <label htmlFor="category">Category</label>
               <Controller
@@ -182,7 +201,7 @@ function Home() {
                     className={`form-control mb-3 ${errors.category?.category_id ? 'is-invalid' : ''}`}
                   >
                     <option value="">Select Category</option>
-                    {categories.map((category) => (
+                    {categories.map(category => (
                       <option key={category.category_id} value={category.category_id}>
                         {category.category_name}
                       </option>
@@ -190,7 +209,9 @@ function Home() {
                   </select>
                 )}
               />
-              {errors.category?.category_id && <div className="invalid-feedback">{errors.category.category_id.message}</div>}
+              {errors.category?.category_id && (
+                <div className="invalid-feedback">{errors.category.category_id.message}</div>
+              )}
 
               <label htmlFor="venue">Venue</label>
               <Controller
@@ -202,7 +223,7 @@ function Home() {
                     className={`form-control mb-3 ${errors.venue?.venue_id ? 'is-invalid' : ''}`}
                   >
                     <option value="">Select Venue</option>
-                    {venues.map((venue) => (
+                    {venues.map(venue => (
                       <option key={venue.venue_id} value={venue.venue_id}>
                         {venue.venue_name}
                       </option>
@@ -217,7 +238,9 @@ function Home() {
                 {...register('image')}
                 className={`form-control mb-3 ${errors.image ? 'is-invalid' : ''}`}
               />
-              {errors.venue?.venue_id && <div className="invalid-feedback">{errors.venue.venue_id.message}</div>}
+              {errors.venue?.venue_id && (
+                <div className="invalid-feedback">{errors.venue.venue_id.message}</div>
+              )}
 
               <Modal.Footer>
                 <Button variant="secondary" onClick={closeModal}>
@@ -253,10 +276,7 @@ function Home() {
               </Form.Select>
             </Col>
             <Col md={4}>
-              <Form.Select
-                value={selectedVenue}
-                onChange={e => setSelectedVenue(e.target.value)}
-              >
+              <Form.Select value={selectedVenue} onChange={e => setSelectedVenue(e.target.value)}>
                 <option value="">Select Venue</option>
                 {venues.map(venue => (
                   <option key={venue.venue_id} value={`${venue.city}-${venue.country}`}>
@@ -277,19 +297,32 @@ function Home() {
         </Form>
 
         <h1 className="text-center mb-4">Upcoming Events</h1>
-
         <Row>
-          {filteredEvents.map((event, index) => (
+          {filteredEvents.slice(0, eventsToShow).map((event, index) => (
             <Col lg={3} className="mb-4" key={index}>
-              <Card style={{ width: '25rem' }}>
+              <Card
+                style={{
+                  width: '25rem',
+                  borderRadius: '0.5rem',
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+                  overflow: 'hidden',
+                }}
+              >
                 <Card.Img
                   variant="top"
                   src={`http://localhost:5000/${event.image}`}
-                  style={{ height: '300px', objectFit: 'cover' }} // Fixed height and aspect ratio preservation
+                  style={{ height: '200px', objectFit: 'cover' }} // Adjust height as needed
                 />
                 <Card.Body>
-                  <Card.Title><h2>{event.event_name}</h2></Card.Title>
-                  <Button as={NavLink as any} to={`/event/${event.event_id}`} variant="primary">
+                  <Card.Title>
+                    <h4 style={{ marginBottom: '0.5rem' }}>{event.event_name}</h4>
+                  </Card.Title>
+                  <Button
+                    as={NavLink as any}
+                    to={`/event/${event.event_id}`}
+                    variant="primary"
+                    style={{ width: 'auto', padding: '0.5rem 1rem', display: 'inline-block' }}
+                  >
                     View Event
                   </Button>
                 </Card.Body>
@@ -297,6 +330,13 @@ function Home() {
             </Col>
           ))}
         </Row>
+        {filteredEvents.length > eventsToShow && (
+          <div className="text-center mt-4">
+            <Button variant="primary" onClick={handleViewMore}>
+              View More
+            </Button>
+          </div>
+        )}
       </Container>
     </section>
   );

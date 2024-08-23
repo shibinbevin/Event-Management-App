@@ -7,12 +7,12 @@ const updatedRole = process.argv[3] ?? "1";
 const updateUser = async () => {
   await connect();
   const userRepository = connection!.getRepository(User);
-  userRepository.find({ id: userId }).then((user: any) => {
+  userRepository.find({ user_id: userId }).then((user: any) => {
     if (!user.length) {
       console.error( "No user exists with the given id" )
       return;
     }
-    const query = { id: user[0].id };
+    const query = { user_id: user[0].id };
     const newValues = { user_role: updatedRole };
     userRepository
       .update(query, newValues)

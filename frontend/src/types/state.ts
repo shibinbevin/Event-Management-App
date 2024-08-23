@@ -48,6 +48,7 @@ export interface UserState {
   status: ValueOf<Status>;
   token: string;
   role: string;
+  error: string;
 }
 
 export interface RootState {
@@ -55,8 +56,52 @@ export interface RootState {
   app: AppState;
   github: GitHubState;
   user: UserState;
+  event: EventState;
+}
+
+export interface IFormInput {
+  email: string;
+  password: string;
 }
 
 export interface WithDispatch {
   dispatch: Dispatch;
 }
+
+export interface Event {
+  event_id?: string;
+  event_name: string;
+  organizer_name: string;
+  event_date: string;
+  venue: Venue;
+  category: Category;
+  image?: FileList; 
+  status?: string;
+}
+
+export interface EventState {
+  events: Event[]; 
+  categories: Category[]; 
+  venues: Venue[]; 
+  currentEvent: Event | null;
+  eventToApprove: Event | null;
+  status: string;
+  error: string | null;
+  isModalOpen: boolean;
+  isEditMode: boolean;
+  isConfirmModalOpen: boolean;
+}
+
+export interface Venue {
+  venue_id?: string;
+  venue_name: string;
+  city: string;
+  country: string;
+  capacity: number;
+}
+
+export interface Category {
+  category_id?: string;
+  category_name: string;
+}
+

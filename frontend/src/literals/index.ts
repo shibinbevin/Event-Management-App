@@ -6,4 +6,5 @@ export const STATUS: Status = {
   READY: 'ready',
   SUCCESS: 'success',
   ERROR: 'error',
+  FAILED: 'failed'
 };

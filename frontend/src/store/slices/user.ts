@@ -1,30 +1,33 @@
-import { createSlice } from '@reduxjs/toolkit';
-
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { STATUS } from '~/literals';
-
-import { UserState } from '~/types';
+import { UserState, IFormInput } from '~/types';
 
 export const userState: UserState = {
   isAuthenticated: false,
   user: {},
   status: STATUS.IDLE,
   token: "",
-  role: ""
+  role: "",
+  error: ""
 };
 
 export const userSlice = createSlice({
   name: 'user',
   initialState: userState,
   reducers: {
-    login: draft => {
+    login: (draft, _action: PayloadAction<IFormInput>) => {
       draft.status = STATUS.RUNNING;
     },
-    loginSuccess: (draft, {payload}) => {
+    loginSuccess: (draft, { payload }) => {
       draft.isAuthenticated = true;
       draft.user = payload.user;
       draft.token = payload.token;
       draft.role = payload.role;
       draft.status = STATUS.READY;
+    },
+    loginFailure: (draft, { payload }) => {
+      draft.status = STATUS.FAILED;
+      draft.error = payload.error;
     },
     logOut: draft => {
       draft.status = STATUS.RUNNING;
@@ -39,5 +42,5 @@ export const userSlice = createSlice({
   },
 });
 
-export const { login, loginSuccess, logOut, logOutSuccess } = userSlice.actions;
+export const { login, loginSuccess, loginFailure, logOut, logOutSuccess } = userSlice.actions;
 export default userSlice.reducer;

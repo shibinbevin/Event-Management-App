@@ -1,47 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Alert } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import axios from 'axios';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { login } from '~/actions';
 import { Link } from 'react-router-dom';
 import { useForm, SubmitHandler } from 'react-hook-form';
-
-interface IFormInput {
-    email: string;
-    password: string;
-}
+import { IFormInput } from '~/types';
+import { STATUS } from '~/literals';
+import { selectUser } from '~/selectors';
 
 function Login() {
     const dispatch = useDispatch();
-    const [error, setError] = useState('');
+    const [errorState, setError] = useState('');
     const [success, setSuccess] = useState('');
 
     const { register, handleSubmit, formState: { errors } } = useForm<IFormInput>();
 
-    const onSubmit: SubmitHandler<IFormInput> = async (data) => {
-        try {
-            const response = await axios.post('http://localhost:5000/api/users/login', data);
-            if (response.data.success) {
-                setSuccess('Login Successful');
-                setError('');
-                dispatch(login(response.data));
-            } else {
-                setError(response.data.msg);
-                setSuccess('');
-            }
-        } catch (error) {
-            console.error('Invalid Credentials', error);
-            setError('Invalid Credentials');
+    // Select authentication status and error messages from the Redux state
+    const { status, isAuthenticated, error } = useSelector(selectUser);
+
+    const onSubmit: SubmitHandler<IFormInput> = (data) => {
+        dispatch(login(data));
+    };
+
+    // Use useEffect to handle side effects based on status changes
+    useEffect(() => {
+        if (status === STATUS.READY && isAuthenticated) {
+            setSuccess('Login Successful');
+            setError('');
+        } else if (status === STATUS.FAILED) {  // Assuming you have a FAILED status
+            setError(error);
             setSuccess('');
         }
-    };
+    }, [status, isAuthenticated]);
 
     return (
         <>
             <Container>
                 <Row className="py-5 mt-4 align-items-center">
-                    {/* For Demo Purpose */}
                     <Col md={5} className="pr-lg-5 mb-5 mb-md-0">
                         <img
                             src="https://bootstrapious.com/i/snippets/sn-registeration/illustration.svg"
@@ -50,9 +46,7 @@ function Login() {
                         />
                         <h1>Login to your Account</h1>
                     </Col>
-                    {/* Login Form */}
                     <Col md={7} lg={6}>
-                        {/* Success Alert */}
                         {success && (
                             <Col lg={10}>
                                 <Alert variant="success" onClose={() => setSuccess('')} dismissible>
@@ -60,8 +54,7 @@ function Login() {
                                 </Alert>
                             </Col>
                         )}
-                        {/* Error Alert */}
-                        {error && (
+                        {errorState && (
                             <Col lg={10}>
                                 <Alert variant="danger" onClose={() => setError('')} dismissible>
                                     {error}
@@ -70,7 +63,6 @@ function Login() {
                         )}
                         <Form onSubmit={handleSubmit(onSubmit)}>
                             <Row>
-                                {/* Email Address */}
                                 <Col lg={12} className="mb-4">
                                     <Form.Group controlId="email">
                                         <Form.Control
@@ -92,7 +84,6 @@ function Login() {
                                         )}
                                     </Form.Group>
                                 </Col>
-                                {/* Password */}
                                 <Col lg={12} className="mb-4">
                                     <Form.Group controlId="password">
                                         <Form.Control
@@ -108,20 +99,17 @@ function Login() {
                                         )}
                                     </Form.Group>
                                 </Col>
-                                {/* Submit Button */}
                                 <Col lg={12} className="mx-auto mb-4">
-                                    <Button type="submit" className="btn-block py-2" variant="primary">
+                                    <Button type="submit" className="btn-block py-2" variant="primary" disabled={status === STATUS.RUNNING}>
                                         <span className="font-weight-bold">Login</span>
                                     </Button>
                                 </Col>
-                                {/* Not Registered */}
                                 <Col lg={12}>
                                     <p className="text-muted font-weight-bold">
                                         Don't have an account?{' '}
                                         <Link to="/register" className="text-primary ml-2">Sign Up</Link>
                                     </p>
                                 </Col>
-                                {/* Forgot Password */}
                                 <Col lg={12}>
                                     <p className="text-muted font-weight-bold">
                                         Forgot your password?{' '}

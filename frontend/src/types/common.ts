@@ -22,6 +22,7 @@ export interface RouteProps {
 }
 
 export interface Status {
+  FAILED: 'failed';
   ERROR: 'error';
   IDLE: 'idle';
   READY: 'ready';

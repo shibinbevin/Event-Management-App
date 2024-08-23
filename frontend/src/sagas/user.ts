@@ -1,19 +1,36 @@
-import { all, delay, put, takeLatest } from 'redux-saga/effects';
+import { all, call, put, takeLatest } from 'redux-saga/effects';
+import axios, { AxiosResponse } from 'axios';
+import { PayloadAction } from '@reduxjs/toolkit';
+import { login, logOut, loginSuccess, loginFailure, logOutSuccess } from '~/actions';
+import { IFormInput } from '~/types';
 
-import { login, loginSuccess, logOut, logOutSuccess } from '~/actions';
+// Define the return type of the saga
+type LoginResponse = {
+  success: boolean;
+  user: any; // Replace `any` with the actual user type if known
+  token: string;
+  role: string;
+  msg: string;
+};
 
-export function* loginSaga({ payload }: ReturnType<typeof login>) {
-  yield delay(400);
-
-  yield put(loginSuccess(payload));
+function* loginSaga(action: PayloadAction<IFormInput>): Generator<any, void, AxiosResponse<LoginResponse>> {
+  try {
+    const response = yield call(axios.post, 'http://localhost:5000/api/users/login', action.payload);
+    
+    if (response.data.success) {
+      yield put(loginSuccess(response.data));
+    } else {
+      yield put(loginFailure({ error: response.data.msg }));
+    }
+  } catch (error:any) {
+    yield put(loginFailure({ error: error.response.data.msg }));
+  }
 }
 
 export function* logoutSaga() {
-  yield delay(200);
-
   yield put(logOutSuccess());
 }
 
-export default function* root() {
+export default function* rootSaga() {
   yield all([takeLatest(login.type, loginSaga), takeLatest(logOut.type, logoutSaga)]);
 }

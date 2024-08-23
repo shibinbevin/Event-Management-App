@@ -37,9 +37,6 @@ server.use(cors());
 server.use(express.json());
 server.use(express.urlencoded({ extended: true }));
 
-console.log(__dirname);
-
-
 server.use('/uploads', express.static(path.join('C:/Users/272867/Desktop/Project/backend', 'uploads')));
 
 // Initialize routes middleware
